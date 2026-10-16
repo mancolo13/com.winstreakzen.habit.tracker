@@ -2,25 +2,33 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../services/routing_service.dart';
 
+
 class Tab1Screen extends StatefulWidget {
   const Tab1Screen({super.key});
-
   @override
   State<Tab1Screen> createState() => _Tab1ScreenState();
 }
 
 class _Tab1ScreenState extends State<Tab1Screen> {
-  int _score = 92;
-  bool _active = true;
+  final List<Map<String, dynamic>> _habits = [
+    {'title': 'Morning 10m Meditation', 'cat': 'Mind', 'done': true},
+    {'title': 'Drink 2.5L Filtered Water', 'cat': 'Health', 'done': true},
+    {'title': '30m Deep Book Reading', 'cat': 'Growth', 'done': true},
+    {'title': 'HIIT Workout or 5km Run', 'cat': 'Fitness', 'done': false},
+    {'title': 'Evening Journal & Review', 'cat': 'Discipline', 'done': false},
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final completedCount = _habits.where((h) => h['done'] == true).length;
+    final progress = completedCount / _habits.length;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Win • Habits'),
+        title: const Text('Win • StreakZen'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.stars_rounded, color: AppTheme.primaryColor),
+            icon: const Icon(Icons.add_task, color: AppTheme.primaryColor),
             onPressed: () => RoutingService.openRegistrationUrl(),
           ),
         ],
@@ -29,34 +37,30 @@ class _Tab1ScreenState extends State<Tab1Screen> {
         padding: const EdgeInsets.all(16),
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppTheme.primaryColor.withValues(alpha: 0.3), AppTheme.surfaceColor],
+                colors: [AppTheme.primaryColor.withValues(alpha: 0.28), AppTheme.surfaceColor],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.4)),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.35)),
             ),
             child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Habits Health', style: const TextStyle(fontSize: 16, color: Colors.white70)),
-                    Switch(
-                      value: _active,
-                      activeThumbColor: AppTheme.primaryColor,
-                      onChanged: (v) => setState(() => _active = v),
-                    ),
+                    const Text('TODAY\'S DISCIPLINE', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                    Text('🔥 19 Day Streak', style: const TextStyle(color: AppTheme.secondaryColor, fontWeight: FontWeight.bold, fontSize: 13)),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text('$_score%', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
+                const SizedBox(height: 14),
+                Text('$completedCount / ${_habits.length} Habits Done', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 10),
                 LinearProgressIndicator(
-                  value: 0.92,
+                  value: progress,
                   backgroundColor: Colors.white12,
                   color: AppTheme.primaryColor,
                   minHeight: 8,
@@ -65,47 +69,57 @@ class _Tab1ScreenState extends State<Tab1Screen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _buildMetric('Total', '1,840', Icons.analytics)),
-              const SizedBox(width: 12),
-              Expanded(child: _buildMetric('Active', '99.2%', Icons.speed)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...List.generate(3, (i) => Card(
-            color: AppTheme.surfaceColor,
+          const SizedBox(height: 18),
+          const Text('Today\'s Checklist', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          ..._habits.map((h) => Container(
             margin: const EdgeInsets.only(bottom: 10),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
-                child: Icon(Icons.check, color: AppTheme.primaryColor),
-              ),
-              title: Text('Habits Priority ${i + 1}'),
-              subtitle: Text('Progress: Normal • Level ${i + 1}'),
-              trailing: const Icon(Icons.chevron_right, color: Colors.white38),
-              onTap: () => setState(() => _score = (_score + 1) % 100),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: (h['done'] as bool) ? AppTheme.primaryColor.withValues(alpha: 0.25) : Colors.white10),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => setState(() => h['done'] = !(h['done'] as bool)),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: (h['done'] as bool) ? AppTheme.primaryColor : Colors.white10,
+                    ),
+                    child: (h['done'] as bool) ? const Icon(Icons.check, size: 20, color: Colors.white) : null,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        h['title'] as String,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          decoration: (h['done'] as bool) ? TextDecoration.lineThrough : null,
+                          color: (h['done'] as bool) ? Colors.white54 : Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(h['cat'] as String, style: const TextStyle(color: AppTheme.secondaryColor, fontSize: 11)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           )),
         ],
       ),
     );
   }
-
-  Widget _buildMetric(String t, String v, IconData ic) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppTheme.surfaceColor, borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(ic, color: AppTheme.secondaryColor, size: 28),
-          const SizedBox(height: 8),
-          Text(t, style: const TextStyle(color: Colors.white60, fontSize: 13)),
-          Text(v, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
 }
+
